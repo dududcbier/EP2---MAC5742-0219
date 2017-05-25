@@ -1,0 +1,5 @@
+*.o
+.DS_Store
+encrypt_cuda
+encrypted_files/
+decrypted_files/
