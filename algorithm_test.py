@@ -7,9 +7,9 @@ test_files = ['ulysses.txt', 'king_james_bible.txt', 'moby_dick.txt', 'tale_of_t
 
 for a in algorithms:
 	for f in test_files:
-		call(["./encrypt_cuda", "sample_files/" + f, a, "-d"])
+		call(["./encode_cuda", "sample_files/" + f, a, "-d"])
 
-match, mismatch, errors = filecmp.cmpfiles("encrypted_files/", "decrypted_files/", test_files);
+match, mismatch, errors = filecmp.cmpfiles("encoded_files/", "decoded_files/", test_files);
 
 if (len(match) == len(test_files)):
 	print("Passed!")

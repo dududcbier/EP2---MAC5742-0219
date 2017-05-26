@@ -7,8 +7,8 @@
 #include <libgen.h>
 
 #define ROT_13 0
-#define ENCRYPTED_FILES_DIR "encrypted_files/"
-#define DECRYPTED_FILES_DIR "decrypted_files/"
+#define ENCODED_FILES_DIR "encoded_files/"
+#define DECODED_FILES_DIR "decoded_files/"
 
 int main(int argc, char *argv[]) {
 	FILE *f;
@@ -20,9 +20,9 @@ int main(int argc, char *argv[]) {
 	if (argc <= 2) {
 		printf("usage: %s [filename] [algorithm] -d\n", argv[0]);
 		printf("\tfilename: path to file\n");
-		printf("\talgorithm: encryption algorithm to be used. Can be either a number or a string\n");
+		printf("\talgorithm: encoding algorithm to be used. Can be either a number or a string\n");
 		printf("\t    rot_13 => 'rot_13' or %d\n\n", ROT_13);
-		printf("\t-d: decrypt file that was encrypted\n");
+		printf("\t-d: decode file after encoding it\n");
 		exit(0);
 	}
 	filename = basename(argv[1]);
@@ -44,10 +44,10 @@ int main(int argc, char *argv[]) {
 	string[size] = '\0';
 	fclose(f);
 
-	strcpy(enc_path, ENCRYPTED_FILES_DIR);
+	strcpy(enc_path, ENCODED_FILES_DIR);
 	strcat(enc_path, filename);
-	if (stat(ENCRYPTED_FILES_DIR, &st) == -1) 
-    	mkdir(ENCRYPTED_FILES_DIR, 0777);
+	if (stat(ENCODED_FILES_DIR, &st) == -1) 
+    	mkdir(ENCODED_FILES_DIR, 0777);
 	f = fopen(enc_path, "w");
 	if (f == NULL) {
 		printf("Can't write to file\n");
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
 	switch(algorithm) {
 		case ROT_13:
-			rot13_encrypt(string);
+			rot13_encode(string);
 			fprintf(f, "%s", string);
 			break;
 		default:
@@ -66,27 +66,28 @@ int main(int argc, char *argv[]) {
 	fclose(f);
 
 	if (argc >= 4 && strcmp(argv[3], "-d") == 0) {
-		strcpy(enc_path, DECRYPTED_FILES_DIR);
+		strcpy(enc_path, DECODED_FILES_DIR);
 		strcat(enc_path, filename);
-		if (stat(DECRYPTED_FILES_DIR, &st) == -1) 
-    		mkdir(DECRYPTED_FILES_DIR, 0777);
+		if (stat(DECODED_FILES_DIR, &st) == -1) 
+    		mkdir(DECODED_FILES_DIR, 0777);
 		f = fopen(enc_path, "w");
 		if (f == NULL) {
 			printf("Can't write to file\n");
 			exit(1);
 		}
-	}
 
-	switch(algorithm) {
-		case ROT_13:
-			rot13_decrypt(string);
-			fprintf(f, "%s", string);
-			break;
-		default:
-			printf("I don't know that algorithm...\n");
-			break;
+		switch(algorithm) {
+			case ROT_13:
+				rot13_decode(string);
+				fprintf(f, "%s", string);
+				break;
+			default:
+				printf("I don't know that algorithm...\n");
+				break;
+		}
+
+		fclose(f);
 	}
-	fclose(f);
 
 	free(string);
 	return 0;

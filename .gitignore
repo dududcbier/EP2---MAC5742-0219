@@ -1,5 +1,5 @@
 *.o
 .DS_Store
-encrypt_cuda
-encrypted_files/
-decrypted_files/
+encode_cuda
+encoded_files/
+decoded_files/

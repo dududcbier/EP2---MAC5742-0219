@@ -25,7 +25,7 @@ void rot13_cuda(int n, char *str) {
     }
 }
 extern "C"
-void rot13_encrypt(char *data) {
+void rot13_encode(char *data) {
     char *enc;
     int n = strlen(data);
 
@@ -38,8 +38,8 @@ void rot13_encrypt(char *data) {
     errorCheck(cudaFree(enc), (char *) "cudaFree");
 }
 extern "C"
-void rot13_decrypt(char *data) {
-    rot13_encrypt(data);
+void rot13_decode(char *data) {
+    rot13_encode(data);
 }
 
 // Returns OK if no errors occur and ERROR otherwise
