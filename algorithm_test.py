@@ -1,19 +1,25 @@
 from subprocess import call
 import filecmp
 
-call(["make"])
-algorithms = ['rot_13']
-test_files = ['ulysses.txt', 'king_james_bible.txt', 'moby_dick.txt', 'tale_of_two_cities.txt']
+class bcolors:
+	OK = '\033[92m'
+	FAIL = '\033[91m'
+	ENDC = '\033[0m'
 
+call(["make"])
+algorithms = ['rot_13', 'base64']
+test_files = ['ulysses.txt', 'king_james_bible.txt', 'moby_dick.txt', 'tale_of_two_cities.txt']
+print("Running tests...\n")
 for a in algorithms:
 	for f in test_files:
 		call(["./encode_cuda", "sample_files/" + f, a, "-d"])
+	match, mismatch, errors = filecmp.cmpfiles("encoded_files/" + a + "/", "decoded_files/" + a + "/", test_files);
+	print(a + ": ", end="")
+	if (len(match) == len(test_files)):
+		print(bcolors.OK + "OK" + bcolors.ENDC)
+	else:
+		print(bcolors.FAIL + "Failed"  + bcolors.ENDC)
+		print("\tmismatch: {}".format(mismatch))
+		print("\terrors: {}".format(mismatch))
 
-match, mismatch, errors = filecmp.cmpfiles("encoded_files/", "decoded_files/", test_files);
-
-if (len(match) == len(test_files)):
-	print("Passed!")
-else:
-	print("Test failed")
-	print("mismatch: {}".format(mismatch))
-	print("errors: {}".format(mismatch))
+print("")
