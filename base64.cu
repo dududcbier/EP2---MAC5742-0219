@@ -31,7 +31,7 @@ BYTE reverse_char(char ch) {
 __global__
 void base64_cuda_encode(size_t n, BYTE *in, BYTE *out, BYTE *d_charset) {
     size_t i = (blockDim.x * blockIdx.x + threadIdx.x) * 3;
-    size_t j, left_over = n % 3;
+    size_t j, left_over = n % 3, newlines;
 
     if (i < n) {
         if (i >= n - left_over)
@@ -40,34 +40,37 @@ void base64_cuda_encode(size_t n, BYTE *in, BYTE *out, BYTE *d_charset) {
             left_over = 0;
         
         j = i / 3 * 4;
-        j += j / 76; // Account for the number of newlines already put
+        newlines = j / 76;
+        j += newlines; // Account for the number of newlines already put
 
-        out[j] = d_charset[in[i] >> 2];
-        if (left_over == 1) {
-            out[j + 1] = d_charset[((in[i] & 0x03) << 4)];
-            out[j + 2] = '=';
-            out[j + 3] = '=';
-        }
-        else {
-            out[j + 1] = d_charset[((in[i] & 0x03) << 4) | (in[i + 1] >> 4)];
-            if (left_over == 2) {
-                out[j + 2] = d_charset[((in[i + 1] & 0x0f) << 2)];
-                out[j + 3] = '=';
-            }
-            else {
+		out[j]     = d_charset[in[i] >> 2];
+        switch(left_over) {
+            case 0:
+                out[j + 1] = d_charset[((in[i] & 0x03) << 4) | (in[i + 1] >> 4)];
                 out[j + 2] = d_charset[((in[i + 1] & 0x0f) << 2) | (in[i + 2] >> 6)];
                 out[j + 3] = d_charset[in[i + 2] & 0x3F];
-            }
+                break;
+            case 1:
+                out[j + 1] = d_charset[(in[i] & 0x03) << 4];
+                out[j + 2] = '=';
+                out[j + 3] = '=';
+                break;
+            case 2:
+                out[j + 1] = d_charset[((in[i] & 0x03) << 4) | (in[i + 1] >> 4)];
+                out[j + 2] = d_charset[(in[i + 1] & 0x0F) << 2];
+                out[j + 3] = '=';
+                break;
         }
-    
-        if ((j - j / 76 + 4) % NEWLINE_INVL == 0)
+
+        if ((j - newlines + 4) % NEWLINE_INVL == 0)
             out[j + 4] = '\n';
+    
     }
 
 } 
 
 __global__
-void base64_cuda_decode(size_t n, BYTE *in, BYTE *out, BYTE *d_charset) {
+void base64_cuda_decode(size_t n, BYTE *in, BYTE *out) {
     size_t i, j, left_over;
 
     if (in[n - 1] == '=')
@@ -82,13 +85,20 @@ void base64_cuda_decode(size_t n, BYTE *in, BYTE *out, BYTE *d_charset) {
     left_over = n % 4;
     if (i < n - left_over)
         left_over = 0;
+
     if (i < n) {
-        if (in[i] == '\n') i++;
-        out[j]     = (reverse_char(in[i]) << 2) | ((reverse_char(in[i + 1]) & 0x30) >> 4);
-        if (left_over != 2){
-            out[j + 1] = (reverse_char(in[i + 1]) << 4) | (reverse_char(in[i + 2]) >> 2);
-            if (left_over != 3)
+        switch(left_over) {
+            case 0:
+                if (in[i] == '\n')
+                    i++;
                 out[j + 2] = (reverse_char(in[i + 2]) << 6) | reverse_char(in[i + 3]);
+
+            case 3:
+                out[j + 1] = (reverse_char(in[i + 1]) << 4) | (reverse_char(in[i + 2]) >> 2);
+
+            case 2:
+                out[j]     = (reverse_char(in[i]) << 2) | ((reverse_char(in[i + 1]) & 0x30) >> 4);
+                break;
         }
     }
 } 
@@ -97,13 +107,13 @@ extern "C"
 void base64_encode(BYTE *data, size_t length, BYTE *output, size_t out_length) {
     BYTE *in, *out, *d_charset;
 
-    cudaMalloc(&in, length * sizeof(BYTE));
-    cudaMalloc(&out, out_length * sizeof(BYTE));
-    cudaMalloc(&d_charset, 64 * sizeof(BYTE));
+    errorCheck(cudaMalloc(&in, length * sizeof(BYTE)), (char *) "cudaMalloc 1");
+    errorCheck(cudaMalloc(&out, out_length * sizeof(BYTE)), (char *) "cudaMalloc 2");
+    errorCheck(cudaMalloc(&d_charset, 64 * sizeof(BYTE)), (char *) "cudaMalloc 3");
     errorCheck(cudaMemcpy(in, data, length * sizeof(BYTE), cudaMemcpyHostToDevice), (char *) "memcpy host to device");
     errorCheck(cudaMemcpy(d_charset, charset, 64 * sizeof(BYTE), cudaMemcpyHostToDevice), (char *) "memcpy host to device");
 
-    base64_cuda_encode<<<(length+255)/256, 256>>>(length, in, out, d_charset);
+    base64_cuda_encode<<<(length+1023)/1024, 1024>>>(length, in, out, d_charset);
 
     errorCheck(cudaMemcpy(output, out, out_length * sizeof(BYTE), cudaMemcpyDeviceToHost), (char *) "memcpy device to host");
     errorCheck(cudaFree(out), (char *) "cudaFree");
@@ -112,15 +122,13 @@ void base64_encode(BYTE *data, size_t length, BYTE *output, size_t out_length) {
 
 extern "C"
 void base64_decode(BYTE *data, size_t length, BYTE *output, size_t out_length) {
-    BYTE *in, *out, *d_charset;
+    BYTE *in, *out;
 
-    cudaMalloc(&in, length * sizeof(BYTE));
-    cudaMalloc(&out, out_length * sizeof(BYTE));
-    cudaMalloc(&d_charset, 64 * sizeof(BYTE));
+    errorCheck(cudaMalloc(&in, length * sizeof(BYTE)), (char *) "cudaMalloc 4");
+    errorCheck(cudaMalloc(&out, out_length * sizeof(BYTE)), (char *) "cudaMalloc 5");
     errorCheck(cudaMemcpy(in, data, length * sizeof(BYTE), cudaMemcpyHostToDevice), (char *) "memcpy host to device");
-    errorCheck(cudaMemcpy(d_charset, charset, 64 * sizeof(BYTE), cudaMemcpyHostToDevice), (char *) "memcpy host to device");
 
-    base64_cuda_decode<<<(length+255)/256, 256>>>(length, in, out, d_charset);
+    base64_cuda_decode<<<(length+1023)/256, 1024>>>(length, in, out);
 
     errorCheck(cudaMemcpy(output, out, out_length * sizeof(BYTE), cudaMemcpyDeviceToHost), (char *) "memcpy device to host");
     errorCheck(cudaFree(out), (char *) "cudaFree");

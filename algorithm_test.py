@@ -13,12 +13,13 @@ print("Running tests...\n")
 for a in algorithms:
 	for f in test_files:
 		call(["./encode_cuda", "sample_files/" + f, a, "-d"])
-	match, mismatch, errors = filecmp.cmpfiles("encoded_files/" + a + "/", "decoded_files/" + a + "/", test_files);
+	match, mismatch, errors = filecmp.cmpfiles("sample_files/", "decoded_files/" + a + "/", test_files);
 	print(a + ": ", end="")
 	if (len(match) == len(test_files)):
 		print(bcolors.OK + "OK" + bcolors.ENDC)
 	else:
 		print(bcolors.FAIL + "Failed"  + bcolors.ENDC)
+		print("\tmatch: {}".format(match))
 		print("\tmismatch: {}".format(mismatch))
 		print("\terrors: {}".format(mismatch))
 
