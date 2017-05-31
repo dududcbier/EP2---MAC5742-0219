@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
 				break;
 			case SEQ_BASE64:
 				seq_base64_decode(out, string, out_length);
-				fprintf(f, "%s", out);
+				fprintf(f, "%s", string);
 				break;
 			default:
 				if (!silent) printf("I don't know that algorithm...\n");

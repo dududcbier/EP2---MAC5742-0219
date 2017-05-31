@@ -8,8 +8,9 @@ class bcolors:
 
 class Test_Error:
 
-	def __init__(self, text, mismatch, errors, algorithm):
+	def __init__(self, text, match, mismatch, errors, algorithm):
 		self.text = text;
+		self.match = match
 		self.mismatch = mismatch;
 		self.errors = errors;
 		self.algorithm = algorithm
@@ -17,6 +18,7 @@ class Test_Error:
 	def print(self):
 		print(self.algorithm + ": ", end="")
 		print(bcolors.FAIL + "Failed: "  + bcolors.ENDC + self.text)
+		print("\tmatch: {}".format(self.match))
 		print("\tmismatch: {}".format(self.mismatch))
 		print("\terrors: {}".format(self.mismatch))
 
@@ -34,11 +36,11 @@ for a in algorithms:
 
 	match, mismatch, errors = filecmp.cmpfiles("encoded_files/sequential/" + a + "/", "encoded_files/" + a + "/", test_files);
 	if (len(match) != len(test_files)):
-		failed_tests[a] = Test_Error("Sequential algorithm should yield the same encoding for a file as the Cuda version", mismatch, errors, a)
+		failed_tests[a] = Test_Error("Sequential algorithm should yield the same encoding for a file as the Cuda version", match, mismatch, errors, a)
 
 	match, mismatch, errors = filecmp.cmpfiles("sample_files/", "decoded_files/" + a + "/", test_files);
 	if (len(match) != len(test_files)):
-		failed_tests[a] = Test_Error("Sequential algorithm should yield the same encoding for a file as the Cuda version", mismatch, errors, a)
+		failed_tests[a] = Test_Error("Decoded file from encoded file should match the original file", match, mismatch, errors, a)
 
 	if a not in failed_tests:
 		print(a + ": " + bcolors.OK + "OK" + bcolors.ENDC)
