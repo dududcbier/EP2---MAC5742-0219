@@ -1,7 +1,7 @@
 #ifndef BASE64
 #define BASE64
 
-void blowfish_decrypt(const unsigned char *in, unsigned char *out, const BLOWFISH_KEY *keystruct);
-void blowfish_encrypt(const unsigned char *in, unsigned char *out, const BLOWFISH_KEY *keystruct);
+void blowfish_decrypt(unsigned char *in, unsigned char *out, BLOWFISH_KEY *keystruct);
+void blowfish_encrypt(unsigned char *in, unsigned char *out, BLOWFISH_KEY *keystruct);
 
 #endif
