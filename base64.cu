@@ -113,7 +113,7 @@ void base64_encode(BYTE *data, size_t length, BYTE *output, size_t out_length) {
     errorCheck(cudaMemcpy(in, data, length * sizeof(BYTE), cudaMemcpyHostToDevice), (char *) "memcpy host to device");
     errorCheck(cudaMemcpy(d_charset, charset, 64 * sizeof(BYTE), cudaMemcpyHostToDevice), (char *) "memcpy host to device");
 
-    base64_cuda_encode<<<(length+127)/128, 128>>>(length, in, out, d_charset);
+    base64_cuda_encode<<<(length / 3 + 127)/128, 128>>>(length, in, out, d_charset);
 
     errorCheck(cudaMemcpy(output, out, out_length * sizeof(BYTE), cudaMemcpyDeviceToHost), (char *) "memcpy device to host");
     errorCheck(cudaFree(out), (char *) "cudaFree");
@@ -128,7 +128,7 @@ void base64_decode(BYTE *data, size_t length, BYTE *output, size_t out_length) {
     errorCheck(cudaMalloc(&out, out_length * sizeof(BYTE)), (char *) "cudaMalloc 5");
     errorCheck(cudaMemcpy(in, data, length * sizeof(BYTE), cudaMemcpyHostToDevice), (char *) "memcpy host to device");
 
-    base64_cuda_decode<<<(length+127)/128, 128>>>(length, in, out);
+    base64_cuda_decode<<<(length / 4 + 127)/128, 128>>>(length, in, out);
 
     errorCheck(cudaMemcpy(output, out, out_length * sizeof(BYTE), cudaMemcpyDeviceToHost), (char *) "memcpy device to host");
     errorCheck(cudaFree(out), (char *) "cudaFree");

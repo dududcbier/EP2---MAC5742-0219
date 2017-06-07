@@ -1,7 +1,7 @@
-CC-FLAGS=-Wno-deprecated-gpu-targets
+CC-FLAGS=-Wno-deprecated-gpu-targets --ptxas-options=-v
 CC=nvcc
 GCC=gcc
-DEP=util.o base64.o rot-13.o encode_cuda.o seq-rot-13.o seq-base64.o
+DEP=util.o base64.o rot-13.o arcfour.o encode_cuda.o seq-rot-13.o seq-base64.o seq-arcfour.o
  
 all: $(DEP) encode_cuda
 
@@ -17,6 +17,9 @@ rot-13.o : rot-13.cu rot-13.cuh
 base64.o : base64.cu base64.cuh
 	$(CC) -c base64.cu $(CC-FLAGS)
 
+arcfour.o : arcfour.cu arcfour.cuh seq-arcfour.o
+	$(CC) -c seq-arcfour.o arcfour.cu $(CC-FLAGS)
+
 util.o : util.c util.h
 	$(CC) -c util.c $(CC-FLAGS) 
 
@@ -25,6 +28,9 @@ seq-rot-13.o : seq-rot-13.c seq-rot-13.h
 
 seq-base64.o : seq-base64.c seq-base64.h
 	$(GCC) -c seq-base64.c
+
+seq-arcfour.o : seq-arcfour.c arcfour.h
+	$(GCC) -c seq-arcfour.c
 
 clean :
 	rm encode_cuda *.o

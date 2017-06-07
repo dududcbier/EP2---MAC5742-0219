@@ -44,20 +44,9 @@ class Line_Result:
 
 	def __repr__(self):
 		return " ".join([self.name, str(self.time_percent) + "%", str(self.time), str(self.avg), str(self.min), str(self.max)])
-		
-	# def add(self, result):
-	# 	if (self.name == result.name):
-	# 		self.time_percent = (self.time_percent * self.count + result.time_percent * result.count) / (result.count + self.count)
-	# 		self.time = (self.time * self.count + result.time) / (self.count + 1)
-	# 		self.avg = (self.avg * self.count + result.avg) / (self.count + 1)
-	# 		self.min = (self.min * self.count + result.min) / (self.count + 1)
-	# 		self.max = (self.max * self.count + result.max) / (self.count + 1)
-	# 		self.count += result.count
-	# 	else:
-	# 		print("Trying to add different types of results!")
 
 p = re.compile('^[ ]*\d+\.?\d+?')
-algorithms = ['rot_13', 'base64']
+algorithms = ['rot_13', 'base64', 'arcfour']
 values = [True, False]
 test_files = ['tale_of_two_cities.txt', 'moby_dick.txt',  'ulysses.txt', 'king_james_bible.txt',
  'hubble_2.png', 'mercury.png', 'hubble_3.tif', 'hubble_1.tif']

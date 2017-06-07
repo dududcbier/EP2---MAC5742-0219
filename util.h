@@ -5,7 +5,7 @@
 
 #define OK 0
 #define ERROR 1
-#define BYTE unsigned char
+typedef unsigned char BYTE;
 
 int errorCheck(cudaError_t code, char origin[]);
 

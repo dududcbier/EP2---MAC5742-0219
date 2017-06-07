@@ -23,8 +23,12 @@ class Test_Error:
 		print("\terrors: {}".format(self.mismatch))
 
 call(["make"])
-algorithms = ['rot_13', 'base64']
-test_files = ['ulysses.txt', 'king_james_bible.txt', 'moby_dick.txt', 'tale_of_two_cities.txt']
+algorithms = ['rot_13', 'base64', 'arcfour']
+test_files = ['king_james_bible.txt', 'moby_dick.txt', 'tale_of_two_cities.txt', 'ulysses.txt']
+
+# Note that the image files were not included in the tests. 
+# Not even the sequential algorithms were able to write
+# valid images files...
 
 failed_tests = {}
 
