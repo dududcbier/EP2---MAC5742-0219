@@ -104,10 +104,10 @@ for seq in values:
 		name += ".pdf"
 		plt.tight_layout()
 		try:
-			plt.savefig('../graphs/file_impact/' + name)
+			plt.savefig('./graphs/file_impact/' + name)
 		except FileNotFoundError:
-			os.makedirs('../graphs/file_impact/')
-			plt.savefig('../graphs/file_impact/' + name)
+			os.makedirs('./graphs/file_impact/')
+			plt.savefig('./graphs/file_impact/' + name)
 
 # CUDA impact
 for f in test_files:
@@ -126,10 +126,10 @@ for f in test_files:
 		name = f + ".pdf"
 		plt.tight_layout()
 		try:
-			plt.savefig('../graphs/cuda_impact/' + a + "/" + name)
+			plt.savefig('./graphs/cuda_impact/' + a + "/" + name)
 		except FileNotFoundError:
-			os.makedirs('../graphs/cuda_impact/' + a)
-			plt.savefig('../graphs/cuda_impact/' + a + "/" + name)
+			os.makedirs('./graphs/cuda_impact/' + a)
+			plt.savefig('./graphs/cuda_impact/' + a + "/" + name)
 		plt.close()
 
 
