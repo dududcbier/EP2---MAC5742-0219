@@ -72,7 +72,7 @@ for a in algorithms:
 			total_times = []
 			total_IO_percents = []
 			times = {}
-			for i in range(0, 10):
+			for i in range(0, 100):
 				if not sequential:
 					output = getoutput("nvprof ./encode_cuda sample_files/" + f + " " + a).split("\n")
 					for line in output:
