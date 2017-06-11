@@ -1,4 +1,4 @@
-CC-FLAGS=-Wno-deprecated-gpu-targets --ptxas-options=-v
+CC-FLAGS=-Wno-deprecated-gpu-targets
 CC=nvcc
 GCC=gcc
 DEP=util.o base64.o rot-13.o arcfour.o encode_cuda.o seq-rot-13.o seq-base64.o seq-arcfour.o

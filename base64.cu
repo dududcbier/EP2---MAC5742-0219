@@ -118,6 +118,7 @@ void base64_encode(BYTE *data, size_t length, BYTE *output, size_t out_length) {
     errorCheck(cudaMemcpy(output, out, out_length * sizeof(BYTE), cudaMemcpyDeviceToHost), (char *) "memcpy device to host");
     errorCheck(cudaFree(out), (char *) "cudaFree");
     errorCheck(cudaFree(in), (char *) "cudaFree");
+    errorCheck(cudaFree(d_charset), (char *) "cudaFree");
 }
 
 extern "C"
